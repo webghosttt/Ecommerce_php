@@ -21,20 +21,28 @@ function getproducts(){
               $product_price=$row['product_price'];
               $category_id=$row['category_id'];
               $brand_id=$row['brand_id'];
-              echo "<div class='col-md-4 mb-2'>
-              <div class='card'>
+              echo "<div class='col-md-4 mb-4'>
+                <div class='card h-100 product-card'>
+                  <div class='position-relative'>
                     <img src='./admin_area/product_images/$product_image1' class='card-img-top' alt='$product_title'>
-                    <div class='card-body'>
-                      <h5 class='card-title'>$product_title</h5>
-                      <p class='card-text'>$product_description</p>
-                      <p class='card-text'>price: $product_price/-</p>
-                      <a href='index.php?add_to_cart=$product_id' class='btn btn-info'>Add To Cart</a>
-                      <a href='product_details.php?product_id=$product_id' class='btn btn-secondary'>View More</a>
+                    <a href='product_details.php?product_id=$product_id' class='btn btn-sm btn-light quick-view-btn'>
+                      <i class='fas fa-eye'></i> Quick View
+                    </a>
+                  </div>
+                  <div class='card-body d-flex flex-column'>
+                    <h5 class='card-title'>$product_title</h5>
+                    <p class='card-text flex-grow-1'>$product_description</p>
+                    <div class='d-flex justify-content-between align-items-center mt-2'>
+                      <span class='price-display'>Rs. $product_price/-</span>
+                      <div class='btn-group'>
+                        <a href='index.php?add_to_cart=$product_id' class='btn btn-primary'>
+                          <i class='fas fa-cart-plus me-1'></i>Add To Cart
+                        </a>
+                      </div>
                     </div>
-                  </div></div>";
-        
-
-
+                  </div>
+                </div>
+              </div>";
             }
           }
         }
@@ -61,19 +69,28 @@ function get_all_products(){
               $product_price=$row['product_price'];
               $category_id=$row['category_id'];
               $brand_id=$row['brand_id'];
-              echo "<div class='col-md-4 mb-2'><div class='card'>
+              echo "<div class='col-md-4 mb-4'>
+                <div class='card h-100 product-card'>
+                  <div class='position-relative'>
                     <img src='./admin_area/product_images/$product_image1' class='card-img-top' alt='$product_title'>
-                    <div class='card-body'>
-                      <h5 class='card-title'>$product_title</h5>
-                      <p class='card-text'>$product_description</p>
-                      <p class='card-text'>price: $product_price/-</p>
-                      <a href='index.php?add_to_cart=$product_id' class='btn btn-info'>Add To Cart</a>
-                      <a href='product_details.php?product_id=$product_id' class='btn btn-secondary'>View More</a>
+                    <a href='product_details.php?product_id=$product_id' class='btn btn-sm btn-light quick-view-btn'>
+                      <i class='fas fa-eye'></i> Quick View
+                    </a>
+                  </div>
+                  <div class='card-body d-flex flex-column'>
+                    <h5 class='card-title'>$product_title</h5>
+                    <p class='card-text flex-grow-1'>$product_description</p>
+                    <div class='d-flex justify-content-between align-items-center mt-2'>
+                      <span class='price-display'>Rs. $product_price/-</span>
+                      <div class='btn-group'>
+                        <a href='display_all.php?add_to_cart=$product_id' class='btn btn-primary'>
+                          <i class='fas fa-cart-plus me-1'></i>Add To Cart
+                        </a>
+                      </div>
                     </div>
-                  </div></div>";
-        
-
-
+                  </div>
+                </div>
+              </div>";
             }
           }
         }
@@ -102,19 +119,28 @@ function get_unique_categories(){
             $product_price=$row['product_price'];
             $category_id=$row['category_id'];
             $brand_id=$row['brand_id'];
-            echo "<div class='col-md-4 mb-2'><div class='card'>
-                  <img src='./admin_area/product_images/$product_image1' class='card-img-top' alt='$product_title'>
-                  <div class='card-body'>
-                    <h5 class='card-title'>$product_title</h5>
-                    <p class='card-text'>$product_description</p>
-                    <p class='card-text'>price: $product_price/-</p>
-                    <a href='index.php?add_to_cart=$product_id' class='btn btn-info'>Add To Cart</a>
-                    <a href='product_details.php?product_id=$product_id' class='btn btn-secondary'>View More</a>
+            echo "<div class='col-md-4 mb-4'>
+                <div class='card h-100 product-card'>
+                  <div class='position-relative'>
+                    <img src='./admin_area/product_images/$product_image1' class='card-img-top' alt='$product_title'>
+                    <a href='product_details.php?product_id=$product_id' class='btn btn-sm btn-light quick-view-btn'>
+                      <i class='fas fa-eye'></i> Quick View
+                    </a>
                   </div>
-                </div></div>";
-      
-
-
+                  <div class='card-body d-flex flex-column'>
+                    <h5 class='card-title'>$product_title</h5>
+                    <p class='card-text flex-grow-1'>$product_description</p>
+                    <div class='d-flex justify-content-between align-items-center mt-2'>
+                      <span class='price-display'>Rs. $product_price/-</span>
+                      <div class='btn-group'>
+                        <a href='display_all.php?add_to_cart=$product_id' class='btn btn-primary'>
+                          <i class='fas fa-cart-plus me-1'></i>Add To Cart
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>";
           }
         }
       }
@@ -144,19 +170,28 @@ function get_unique_brand(){
             $product_price=$row['product_price'];
             $category_id=$row['category_id'];
             $brand_id=$row['brand_id'];
-            echo "<div class='col-md-4 mb-2'><div class='card'>
-                  <img src='./admin_area/product_images/$product_image1' class='card-img-top' alt='$product_title'>
-                  <div class='card-body'>
-                    <h5 class='card-title'>$product_title</h5>
-                    <p class='card-text'>$product_description</p>
-                    <p class='card-text'>price: $product_price/-</p>
-                    <a href='index.php?add_to_cart=$product_id' class='btn btn-info'>Add To Cart</a>
-                    <a href='product_details.php?product_id=$product_id' class='btn btn-secondary'>View More</a>
+            echo "<div class='col-md-4 mb-4'>
+                <div class='card h-100 product-card'>
+                  <div class='position-relative'>
+                    <img src='./admin_area/product_images/$product_image1' class='card-img-top' alt='$product_title'>
+                    <a href='product_details.php?product_id=$product_id' class='btn btn-sm btn-light quick-view-btn'>
+                      <i class='fas fa-eye'></i> Quick View
+                    </a>
                   </div>
-                </div></div>";
-      
-
-
+                  <div class='card-body d-flex flex-column'>
+                    <h5 class='card-title'>$product_title</h5>
+                    <p class='card-text flex-grow-1'>$product_description</p>
+                    <div class='d-flex justify-content-between align-items-center mt-2'>
+                      <span class='price-display'>Rs. $product_price/-</span>
+                      <div class='btn-group'>
+                        <a href='display_all.php?add_to_cart=$product_id' class='btn btn-primary'>
+                          <i class='fas fa-cart-plus me-1'></i>Add To Cart
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>";
           }
         }
       }
@@ -208,7 +243,73 @@ function search_product(){
             $result_query=mysqli_query($con,$search_query);
             $num_of_rows=mysqli_num_rows($result_query);
           if($num_of_rows==0){
-            echo "<h2 class='text-center text-danger'>Sorry the product you are searching for is not available</h2>";
+            // Get popular categories for suggestions
+            $category_query = "SELECT * FROM categories LIMIT 6";
+            $category_result = mysqli_query($con, $category_query);
+            
+            // Get popular keywords for suggestions
+            $keywords = array('laptop', 'phone', 'headphones', 'camera', 'speaker', 'watch');
+            
+            echo "
+            <div class='no-results-container'>
+                <div class='no-results-icon'>
+                    <i class='fas fa-search'></i>
+                </div>
+                <h2 class='no-results-title'>Oops! No results found</h2>
+                <p class='no-results-text'>
+                    Sorry, we couldn't find any products matching '<strong>$search_data_value</strong>'. 
+                    Please try another search term or browse our categories.
+                </p>
+                
+                <div class='search-suggestion'>
+                    <h4>Popular Searches</h4>
+                    <div class='search-suggestion-list'>";
+                    
+                    foreach($keywords as $keyword) {
+                        echo "<a href='search_product.php?search_data=$keyword&search_data_product=Search' class='search-keyword'>$keyword</a>";
+                    }
+                    
+                    echo "</div>
+                </div>
+                
+                <div class='category-suggestions'>
+                    <a href='index.php' class='back-btn'><i class='fas fa-home'></i> Back to Homepage</a>
+                </div>
+                
+                <div class='category-suggestions'>";
+                
+                // Display category cards
+                while($category = mysqli_fetch_assoc($category_result)) {
+                    $category_id = $category['category_id'];
+                    $category_title = $category['category_title'];
+                    $icon_class = '';
+                    
+                    // Assign icons based on category name
+                    if(stripos($category_title, 'laptop') !== false) {
+                        $icon_class = 'fas fa-laptop';
+                    } elseif(stripos($category_title, 'mobile') !== false) {
+                        $icon_class = 'fas fa-mobile-alt';
+                    } elseif(stripos($category_title, 'camera') !== false) {
+                        $icon_class = 'fas fa-camera';
+                    } elseif(stripos($category_title, 'watch') !== false) {
+                        $icon_class = 'fas fa-clock';
+                    } elseif(stripos($category_title, 'speaker') !== false) {
+                        $icon_class = 'fas fa-volume-up';
+                    } else {
+                        $icon_class = 'fas fa-box';
+                    }
+                    
+                    echo "
+                    <a href='index.php?category=$category_id' class='category-card'>
+                        <div class='category-icon'><i class='$icon_class'></i></div>
+                        <p class='category-name'>$category_title</p>
+                    </a>";
+                }
+                
+                echo "
+                </div>
+            </div>
+            ";
           }
             while($row=mysqli_fetch_assoc($result_query)){
               $product_id=$row['product_id'];
@@ -218,19 +319,28 @@ function search_product(){
               $product_price=$row['product_price'];
               $category_id=$row['category_id'];
               $brand_id=$row['brand_id'];
-              echo "<div class='col-md-4 mb-2'><div class='card'>
+              echo "<div class='col-md-4 mb-4'>
+                <div class='card h-100 product-card'>
+                  <div class='position-relative'>
                     <img src='./admin_area/product_images/$product_image1' class='card-img-top' alt='$product_title'>
-                    <div class='card-body'>
-                      <h5 class='card-title'>$product_title</h5>
-                      <p class='card-text'>$product_description</p>
-                      <p class='card-text'>price: $product_price/-</p>
-                      <a href='index.php?add_to_cart=$product_id' class='btn btn-info'>Add To Cart</a>
-                      <a href='product_details.php?product_id=$product_id' class='btn btn-secondary'>View More</a>
+                    <a href='product_details.php?product_id=$product_id' class='btn btn-sm btn-light quick-view-btn'>
+                      <i class='fas fa-eye'></i> Quick View
+                    </a>
+                  </div>
+                  <div class='card-body d-flex flex-column'>
+                    <h5 class='card-title'>$product_title</h5>
+                    <p class='card-text flex-grow-1'>$product_description</p>
+                    <div class='d-flex justify-content-between align-items-center mt-2'>
+                      <span class='price-display'>Rs. $product_price/-</span>
+                      <div class='btn-group'>
+                        <a href='display_all.php?add_to_cart=$product_id' class='btn btn-primary'>
+                          <i class='fas fa-cart-plus me-1'></i>Add To Cart
+                        </a>
+                      </div>
                     </div>
-                  </div></div>";
-        
-
-
+                  </div>
+                </div>
+              </div>";
             }
           }
         }

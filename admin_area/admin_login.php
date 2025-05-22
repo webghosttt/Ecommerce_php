@@ -1,3 +1,10 @@
+<?php
+include('../includes/connect.php');
+include('../functions/common_function.php');
+@session_start();
+?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -48,31 +55,36 @@
 </body>
 </html>
 <?php
-session_start();
-include('../includes/connect.php'); // Include the database connection
+ // Database connection file
 
-if (isset($_POST['admin_login'])) {
-    $admin_name = mysqli_real_escape_string($con, $_POST['admin_name']);
-    $admin_password = mysqli_real_escape_string($con, $_POST['admin_password']);
+if (isset($_POST['login'])) {
+    $username = mysqli_real_escape_string($conn, $_POST['username']);
+    $password = mysqli_real_escape_string($conn, $_POST['password']);
 
-    // Select query to fetch admin data
-    $select_query = "SELECT * FROM `admin_table` WHERE admin_name='$admin_name'";
-    $result = mysqli_query($con, $select_query);
+    // Query to get the user from the database
+    $query = "SELECT * FROM admin_table WHERE username = '$username'";
+    $result = mysqli_query($conn, $query);
 
-    if ($result && mysqli_num_rows($result) > 0) {
-        $row_data = mysqli_fetch_assoc($result);
+    if (mysqli_num_rows($result) > 0) {
+        // User found, now check the password
+        $user = mysqli_fetch_assoc($result);
+        
+        // Verify the password using password_verify (ensure passwords are hashed)
+        if (password_verify($password, $admin['password'])) {
+            // Password correct, set session variables
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
 
-        // Verify password
-        if (password_verify($admin_password, $row_data['admin_password'])) {
-            $_SESSION['admin_name'] = $admin_name;
-            echo "<script>alert('Login Successful');</script>";
-            echo "<script>window.open('index.php', '_self');</script>";
+            // Redirect to the home page (index.php)
+            header("Location: index.php");
+            exit();
         } else {
-            echo "<script>alert('Invalid Password');</script>";
+            echo "Incorrect password.";
         }
     } else {
-        echo "<script>alert('Invalid Username');</script>";
+        echo "No user found with that username.";
     }
 }
 ?>
+
 

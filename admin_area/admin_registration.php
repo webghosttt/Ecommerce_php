@@ -44,10 +44,7 @@ include('../functions/common_function.php');
                 <label for="password" class="form-label">Password</label>
                 <input type="password" id="password" name="password" placeholder="Enter Your password" required="required" class="form-control">
             </div>
-            <div class="form-outline mb-4">
-                <label for="confirm_password" class="form-label"> Confirm Password</label>
-                <input type="confirm_password" id="confirm_password" name="confirm_password" placeholder="Confirm password" required="required" class="form-control">
-            </div>
+            
             <div>
                 <input type="submit" class="bg-info py-2 px-3 border-0" name="admin_registration" value="Register">
                 <p class="small fw-bold mt-2 pf-1 ">Already have an account? <a href="admin_login.php" class="link-danger">Login</a></p>
@@ -64,27 +61,23 @@ include('../functions/common_function.php');
 
 if (isset($_POST['admin_registration'])) {
     // Retrieve and sanitize form inputs
-    $admin_name = mysqli_real_escape_string($con, $_POST['username']);
+    $username = mysqli_real_escape_string($con, $_POST['username']);
     $admin_email = mysqli_real_escape_string($con, $_POST['email']);
     $admin_password = mysqli_real_escape_string($con, $_POST['password']);
-    $conf_admin_password = mysqli_real_escape_string($con, $_POST['confirm_password']);
+    
 
     // Hash the password
     $hash_password = password_hash($admin_password, PASSWORD_DEFAULT);
 
     // Check for existing username or email
-    $select_query = "SELECT * FROM `admin_table` WHERE admin_name='$admin_name' OR admin_email='$admin_email'";
+    $select_query = "SELECT * FROM `admin_table` WHERE username='$username' OR admin_email='$admin_email'";
     $result = mysqli_query($con, $select_query);
     $rows_count = mysqli_num_rows($result);
 
-    if ($rows_count > 0) {
-        echo "<script>alert('Username or email already exists')</script>";
-    } elseif ($admin_password !== $conf_admin_password) {
-        echo "<script>alert('Passwords do not match')</script>";
-    } else {
+    
         // Insert admin into the database
-        $insert_query = "INSERT INTO `admin_table` (admin_name, admin_email, admin_password) 
-                         VALUES ('$admin_name', '$admin_email', '$hash_password')";
+        $insert_query = "INSERT INTO `admin_table` (username, admin_email, admin_password) 
+                         VALUES ('$username', '$admin_email', '$hash_password')";
         $sql_execute = mysqli_query($con, $insert_query);
 
         if ($sql_execute) {
@@ -94,6 +87,6 @@ if (isset($_POST['admin_registration'])) {
             echo "<script>alert('Registration failed. Please try again.');</script>";
         }
     }
-}
+
 ?>
 
