@@ -123,12 +123,11 @@ if (isset($_POST['user_login'])) {
     $row_count_cart = mysqli_num_rows($select_cart);
     
     if ($row_count > 0) {
-        $_SESSION['username'] = $user_username;
         if (password_verify($user_password, $row_data['user_password'])) {
-            if($row_count == 1 && $row_count_cart == 0) {
-                $_SESSION['username'] = $user_username;
+            $_SESSION['username'] = $user_username;
+            if($row_count_cart == 0) {
                 echo "<script>alert('Login Successfully')</script>";
-                echo "<script>window.open('profile.php','_self')</script>";
+                echo "<script>window.open('../index.php','_self')</script>";
             } else {
                 echo "<script>alert('Login Successfully')</script>";
                 echo "<script>window.open('../index.php','_self')</script>";

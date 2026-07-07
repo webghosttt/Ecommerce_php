@@ -407,7 +407,7 @@ if(isset($_GET['add_to_cart'])){
                 </div>
 
                 <!-- Special Offer -->
-                <div class="special-offer mt-4 p-3 bg-light rounded text-center">
+                <!-- <div class="special-offer mt-4 p-3 bg-light rounded text-center">
                     <h4 class="text-danger mb-3">Special Offer</h4>
                     <p>Use code <strong>NEPAL10</strong> for 10% off!</p>
                     <div class="countdown-timer mb-2">
@@ -426,7 +426,7 @@ if(isset($_GET['add_to_cart'])){
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
@@ -555,7 +555,7 @@ if(isset($_GET['add_to_cart'])){
             <hr class="my-4">
             <div class="row">
                 <div class="col-md-6">
-                    <p class="mb-0">&copy; 2023 NepalBazar. All rights reserved.</p>
+                    <p class="mb-0">&copy; 2026 NepalBazar. All rights reserved.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <img src="paypal.jpg" alt="Payment Methods" height="30">

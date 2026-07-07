@@ -728,7 +728,7 @@ session_start();
                 </div>
                 
                 <!-- Payment Methods -->
-                <div class="cart-summary mt-4">
+                <!-- <div class="cart-summary mt-4">
                     <h4 class="summary-title">We Accept</h4>
                     <div class="d-flex justify-content-between mt-3">
                         <img src="https://cdn-icons-png.flaticon.com/128/196/196578.png" alt="Visa" width="50">
@@ -736,7 +736,7 @@ session_start();
                         <img src="https://cdn-icons-png.flaticon.com/128/196/196565.png" alt="PayPal" width="50">
                         <img src="https://cdn-icons-png.flaticon.com/128/5968/5968220.png" alt="American Express" width="50">
                     </div>
-                </div>
+                </div> -->
             </div>
             <?php } ?>
         </div>

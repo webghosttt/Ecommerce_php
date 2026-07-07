@@ -4,29 +4,39 @@ include('../includes/connect.php');
 include('../functions/common_function.php');
 @session_start();
 
-// Define total_orders and total_customers at the beginning
-$get_orders = "SELECT COUNT(*) as total_orders FROM user_orders";
-$result_orders = mysqli_query($con, $get_orders);
-if (!$result_orders) {
-    // Use mock data if query fails
-    $total_orders = 247;
-} else {
-    $row_orders = mysqli_fetch_assoc($result_orders);
-    $total_orders = $row_orders['total_orders'];
-}
+// ── Real Data Queries for Dashboard ──
 
-// Use mock data for customers instead of querying
-$total_customers = 156;
+// Total Orders
+$result_orders = mysqli_query($con, "SELECT COUNT(*) as total FROM user_orders");
+$total_orders = mysqli_fetch_assoc($result_orders)['total'];
 
-/* Original query that might cause issues
-$get_customers = "SELECT COUNT(*) as total_customers FROM user_table";
-$result_customers = mysqli_query($con, $get_customers);
-if (!$result_customers) {
-    die("Query failed: " . mysqli_error($con));
-}
-$row_customers = mysqli_fetch_assoc($result_customers);
-$total_customers = $row_customers['total_customers'];
-*/
+// Total Customers
+$result_customers = mysqli_query($con, "SELECT COUNT(*) as total FROM user_table");
+$total_customers = mysqli_fetch_assoc($result_customers)['total'];
+
+// Pending Orders
+$result_pending_nav = mysqli_query($con, "SELECT COUNT(*) as total FROM user_orders WHERE order_status='pending'");
+$pending_count = mysqli_fetch_assoc($result_pending_nav)['total'];
+
+// Completed Orders
+$result_completed = mysqli_query($con, "SELECT COUNT(*) as total FROM user_orders WHERE order_status='Complete'");
+$completed_orders = mysqli_fetch_assoc($result_completed)['total'];
+
+// Total Revenue (from payments table)
+$result_revenue = mysqli_query($con, "SELECT SUM(amount) as total FROM user_payments");
+$total_revenue = mysqli_fetch_assoc($result_revenue)['total'] ?? 0;
+
+// Total Products
+$result_products = mysqli_query($con, "SELECT COUNT(*) as total FROM products");
+$total_products = mysqli_fetch_assoc($result_products)['total'];
+
+// Total Categories
+$result_categories = mysqli_query($con, "SELECT COUNT(*) as total FROM categories");
+$total_categories = mysqli_fetch_assoc($result_categories)['total'];
+
+// Total Brands
+$result_brands = mysqli_query($con, "SELECT COUNT(*) as total FROM brands");
+$total_brands = mysqli_fetch_assoc($result_brands)['total'];
 ?>
 
 <!DOCTYPE html>
@@ -116,19 +126,11 @@ $total_customers = $row_customers['total_customers'];
                             </a>
                         </li>
                         <li class="nav-item">
-                            <?php
-                            // Get count of new orders (pending) for notifications
-                            $get_pending_orders = "SELECT COUNT(*) as pending_count FROM user_orders WHERE order_status='Pending'";
-                            $result_pending = mysqli_query($con, $get_pending_orders);
-                            if (!$result_pending) {
-                                die("Query failed: " . mysqli_error($con));
-                            }
-                            $row_pending = mysqli_fetch_assoc($result_pending);
-                            $pending_count = $row_pending['pending_count'];
-                            ?>
                             <a class="nav-link" href="index.php?list_orders">
                                 <i class="fas fa-bell me-1"></i>
-                                <span class="badge bg-danger rounded-pill"><?php echo $pending_count; ?></span>
+                                <?php if($pending_count > 0) { ?>
+                                    <span class="badge bg-danger rounded-pill"><?php echo $pending_count; ?></span>
+                                <?php } ?>
                             </a>
                         </li>
                         <li class="nav-item dropdown">
@@ -151,7 +153,6 @@ $total_customers = $row_customers['total_customers'];
             <!-- Sidebar -->
             <div class="col-lg-2 admin-sidebar py-3">
                 <div class="text-center mb-4">
-                    <!-- Replace image with Font Awesome icon -->
                     <div class="mx-auto mb-3" style="width: 80px; height: 80px; background-color: #0d6efd; border-radius: 50%; display: flex; justify-content: center; align-items: center;">
                         <i class="fas fa-user-tie text-white" style="font-size: 40px;"></i>
                     </div>
@@ -236,208 +237,6 @@ $total_customers = $row_customers['total_customers'];
                 <!-- Dashboard Overview -->
                 <h1 class="fw-bold mb-4">Dashboard Overview</h1>
                 
-                <?php
-                // Get real data for dashboard stats
-                
-                // 1. Total Orders - Already defined at the top of the file, no need to query again
-                // $get_orders = "SELECT COUNT(*) as total_orders FROM user_orders";
-                // $result_orders = mysqli_query($con, $get_orders);
-                // $row_orders = mysqli_fetch_assoc($result_orders);
-                // $total_orders = $row_orders['total_orders'];
-                
-                // Get orders from last month for comparison
-                $last_month = date('Y-m-d', strtotime('-1 month'));
-                $get_last_month_orders = "SELECT COUNT(*) as last_month_orders FROM user_orders WHERE order_date > '$last_month'";
-                $result_last_month = mysqli_query($con, $get_last_month_orders);
-                if (!$result_last_month) {
-                    // Use mock data if query fails
-                    $last_month_orders = 32;
-                    $order_percentage = 12;
-                } else {
-                    $row_last_month = mysqli_fetch_assoc($result_last_month);
-                    $last_month_orders = $row_last_month['last_month_orders'];
-                    
-                    // Calculate percentage change in orders
-                    $previous_month = date('Y-m-d', strtotime('-2 month'));
-                    $get_previous_month_orders = "SELECT COUNT(*) as prev_month_orders FROM user_orders WHERE order_date > '$previous_month' AND order_date <= '$last_month'";
-                    $result_prev_month = mysqli_query($con, $get_previous_month_orders);
-                    if (!$result_prev_month) {
-                        // Fallback to mock data
-                        $prev_month_orders = 28;
-                    } else {
-                        $row_prev_month = mysqli_fetch_assoc($result_prev_month);
-                        $prev_month_orders = $row_prev_month['prev_month_orders'] > 0 ? $row_prev_month['prev_month_orders'] : 1;
-                    }
-                    
-                    $order_percentage = round((($last_month_orders - $prev_month_orders) / $prev_month_orders) * 100);
-                }
-                
-                // 2. Revenue - Calculate real revenue from user_payments
-                $get_revenue = "SELECT SUM(amount) as total_revenue FROM user_payments";
-                $result_revenue = mysqli_query($con, $get_revenue);
-                if (!$result_revenue) {
-                    // If query fails, use mock data
-                    $total_revenue = 42850;
-                } else {
-                    $row_revenue = mysqli_fetch_assoc($result_revenue);
-                    $total_revenue = $row_revenue['total_revenue'] ? $row_revenue['total_revenue'] : 0;
-                }
-                
-                // Since we don't have payment_date, we'll estimate using order_id values to determine recent payments
-                // Get data from last 30 days based on order IDs
-                $get_recent_order_ids = "SELECT order_id FROM user_orders WHERE order_date > DATE_SUB(NOW(), INTERVAL 30 DAY)";
-                $result_recent_orders = mysqli_query($con, $get_recent_order_ids);
-                
-                if ($result_recent_orders && mysqli_num_rows($result_recent_orders) > 0) {
-                    $recent_order_ids = array();
-                    while($row = mysqli_fetch_assoc($result_recent_orders)) {
-                        $recent_order_ids[] = $row['order_id'];
-                    }
-                    
-                    if (!empty($recent_order_ids)) {
-                        $order_ids_string = implode(',', $recent_order_ids);
-                        $get_last_month_revenue = "SELECT SUM(amount) as last_month_revenue FROM user_payments WHERE order_id IN ($order_ids_string)";
-                        $result_last_month_revenue = mysqli_query($con, $get_last_month_revenue);
-                        
-                        if ($result_last_month_revenue) {
-                            $row_last_month_revenue = mysqli_fetch_assoc($result_last_month_revenue);
-                            $last_month_revenue = $row_last_month_revenue['last_month_revenue'] ? $row_last_month_revenue['last_month_revenue'] : 0;
-                        } else {
-                            $last_month_revenue = $total_revenue * 0.2; // Estimate 20% of total as last month
-                        }
-                    } else {
-                        $last_month_revenue = $total_revenue * 0.2; // Estimate 20% of total as last month
-                    }
-                } else {
-                    $last_month_revenue = $total_revenue * 0.2; // Estimate 20% of total as last month
-                }
-                
-                // Get previous month revenue (for percentage calculation)
-                $get_older_order_ids = "SELECT order_id FROM user_orders WHERE order_date BETWEEN DATE_SUB(NOW(), INTERVAL 60 DAY) AND DATE_SUB(NOW(), INTERVAL 30 DAY)";
-                $result_older_orders = mysqli_query($con, $get_older_order_ids);
-                
-                if ($result_older_orders && mysqli_num_rows($result_older_orders) > 0) {
-                    $older_order_ids = array();
-                    while($row = mysqli_fetch_assoc($result_older_orders)) {
-                        $older_order_ids[] = $row['order_id'];
-                    }
-                    
-                    if (!empty($older_order_ids)) {
-                        $older_ids_string = implode(',', $older_order_ids);
-                        $get_prev_month_revenue = "SELECT SUM(amount) as prev_month_revenue FROM user_payments WHERE order_id IN ($older_ids_string)";
-                        $result_prev_month_revenue = mysqli_query($con, $get_prev_month_revenue);
-                        
-                        if ($result_prev_month_revenue) {
-                            $row_prev_month_revenue = mysqli_fetch_assoc($result_prev_month_revenue);
-                            $prev_month_revenue = $row_prev_month_revenue['prev_month_revenue'] ? $row_prev_month_revenue['prev_month_revenue'] : 1;
-                        } else {
-                            $prev_month_revenue = $last_month_revenue * 0.95; // Default estimate
-                        }
-                    } else {
-                        $prev_month_revenue = $last_month_revenue * 0.95; // Default estimate
-                    }
-                } else {
-                    $prev_month_revenue = $last_month_revenue * 0.95; // Default estimate
-                }
-                
-                // Calculate percentage change
-                if ($prev_month_revenue > 0) {
-                    $revenue_percentage = round((($last_month_revenue - $prev_month_revenue) / $prev_month_revenue) * 100);
-                } else {
-                    $revenue_percentage = 5; // Default to 5% if can't calculate
-                }
-                
-                // 3. Customers - Get real count from user_table
-                // This is the proper place to query for customers, avoiding duplicate queries
-                $get_customers = "SELECT COUNT(*) as total_customers FROM user_table";
-                $result_customers = mysqli_query($con, $get_customers);
-                if (!$result_customers) {
-                    // Keep using the mock data defined at the top if query fails
-                    // $total_customers already defined as 156
-                } else {
-                    $row_customers = mysqli_fetch_assoc($result_customers);
-                    $total_customers = $row_customers['total_customers'];
-                }
-                
-                // Since we don't have user_registration_date, we'll estimate using user_id values
-                // Assume newer IDs were registered more recently
-                $get_user_id_threshold = "SELECT MAX(user_id) - (COUNT(*)/3) as threshold FROM user_table";
-                $result_threshold = mysqli_query($con, $get_user_id_threshold);
-                
-                if ($result_threshold) {
-                    $row_threshold = mysqli_fetch_assoc($result_threshold);
-                    $recent_threshold = $row_threshold['threshold'];
-                    
-                    // Get recent customers (roughly last month)
-                    $get_recent_customers = "SELECT COUNT(*) as recent_customers FROM user_table WHERE user_id > $recent_threshold";
-                    $result_recent = mysqli_query($con, $get_recent_customers);
-                    
-                    if ($result_recent) {
-                        $row_recent = mysqli_fetch_assoc($result_recent);
-                        $last_month_customers = $row_recent['recent_customers'];
-                    } else {
-                        $last_month_customers = round($total_customers * 0.18); // Estimate 18% of total as recent
-                    }
-                    
-                    // Get slightly older customers (previous month)
-                    $get_prev_customers = "SELECT COUNT(*) as prev_customers FROM user_table WHERE user_id > ($recent_threshold - (COUNT(*)/3)) AND user_id <= $recent_threshold";
-                    $result_prev = mysqli_query($con, $get_prev_customers);
-                    
-                    if ($result_prev) {
-                        $row_prev = mysqli_fetch_assoc($result_prev);
-                        $prev_month_customers = $row_prev['prev_customers'];
-                        if ($prev_month_customers == 0) $prev_month_customers = 1; // Avoid division by zero
-                    } else {
-                        $prev_month_customers = round($total_customers * 0.15); // Estimate 15% of total as previous month
-                    }
-                } else {
-                    // Fallback to estimates if query fails
-                    $last_month_customers = round($total_customers * 0.18); // 18% of total
-                    $prev_month_customers = round($total_customers * 0.15); // 15% of total
-                }
-                
-                // Calculate percentage change
-                $prev_month_customers = max(1, $prev_month_customers); // Ensure denominator is at least 1
-                $customer_percentage = round((($last_month_customers - $prev_month_customers) / $prev_month_customers) * 100);
-                
-                // 4. Products
-                $get_products = "SELECT COUNT(*) as total_products FROM products";
-                $result_products = mysqli_query($con, $get_products);
-                if (!$result_products) {
-                    // Use mock data if query fails
-                    $total_products = 68;
-                } else {
-                    $row_products = mysqli_fetch_assoc($result_products);
-                    $total_products = $row_products['total_products'];
-                }
-                
-                // Get products from last month - using mock data to avoid date column issues
-                $last_month_products = 12;
-                $prev_month_products = 11;
-                $product_percentage = 7;
-                
-                /* Original code with date column that might cause errors
-                $get_last_month_products = "SELECT COUNT(*) as last_month_products FROM products WHERE date > '$last_month'";
-                $result_last_month_products = mysqli_query($con, $get_last_month_products);
-                if (!$result_last_month_products) {
-                    die("Query failed: " . mysqli_error($con));
-                }
-                $row_last_month_products = mysqli_fetch_assoc($result_last_month_products);
-                $last_month_products = $row_last_month_products['last_month_products'];
-                
-                // Calculate percentage change in products
-                $get_previous_month_products = "SELECT COUNT(*) as prev_month_products FROM products WHERE date > '$previous_month' AND date <= '$last_month'";
-                $result_prev_month_products = mysqli_query($con, $get_previous_month_products);
-                if (!$result_prev_month_products) {
-                    die("Query failed: " . mysqli_error($con));
-                }
-                $row_prev_month_products = mysqli_fetch_assoc($result_prev_month_products);
-                $prev_month_products = $row_prev_month_products['prev_month_products'] > 0 ? $row_prev_month_products['prev_month_products'] : 1;
-                
-                $product_percentage = round((($last_month_products - $prev_month_products) / $prev_month_products) * 100);
-                */
-                ?>
-                
                 <!-- Stats Cards -->
                 <div class="row dashboard-stats mb-4">
                     <div class="col-xl-3 col-md-6 mb-4">
@@ -450,17 +249,14 @@ $total_customers = $row_customers['total_customers'];
                                     <div class="ms-3">
                                         <h6 class="text-muted mb-0">Total Orders</h6>
                                         <h2 class="fw-bold my-1"><?php echo $total_orders; ?></h2>
-                                        <span class="badge <?php echo $order_percentage >= 0 ? 'bg-success' : 'bg-danger'; ?>">
-                                            <i class="fas fa-arrow-<?php echo $order_percentage >= 0 ? 'up' : 'down'; ?> me-1"></i><?php echo abs($order_percentage); ?>%
-                                        </span>
-                                        <span class="text-muted small">since last month</span>
+                                        <span class="text-muted small"><?php echo $completed_orders; ?> completed, <?php echo $pending_count; ?> pending</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="col-xl-3 col-md-6 mb-4">
+                    <!-- <div class="col-xl-3 col-md-6 mb-4">
                         <div class="card h-100">
                             <div class="card-body">
                                 <div class="d-flex align-items-center">
@@ -468,17 +264,14 @@ $total_customers = $row_customers['total_customers'];
                                         <i class="fas fa-money-bill-wave"></i>
                                     </div>
                                     <div class="ms-3">
-                                        <h6 class="text-muted mb-0">Revenue</h6>
-                                        <h2 class="fw-bold my-1">₹ <?php echo number_format($total_revenue, 0); ?></h2>
-                                        <span class="badge <?php echo $revenue_percentage >= 0 ? 'bg-success' : 'bg-danger'; ?>">
-                                            <i class="fas fa-arrow-<?php echo $revenue_percentage >= 0 ? 'up' : 'down'; ?> me-1"></i><?php echo abs($revenue_percentage); ?>%
-                                        </span>
-                                        <span class="text-muted small">since last month</span>
+                                        <h6 class="text-muted mb-0">Total Revenue</h6>
+                                        <h2 class="fw-bold my-1">Rs. <?php echo number_format($total_revenue, 0); ?></h2>
+                                        <span class="text-muted small">From <?php echo $total_orders; ?> orders</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                     
                     <div class="col-xl-3 col-md-6 mb-4">
                         <div class="card h-100">
@@ -490,10 +283,7 @@ $total_customers = $row_customers['total_customers'];
                                     <div class="ms-3">
                                         <h6 class="text-muted mb-0">Customers</h6>
                                         <h2 class="fw-bold my-1"><?php echo $total_customers; ?></h2>
-                                        <span class="badge <?php echo $customer_percentage >= 0 ? 'bg-success' : 'bg-danger'; ?>">
-                                            <i class="fas fa-arrow-<?php echo $customer_percentage >= 0 ? 'up' : 'down'; ?> me-1"></i><?php echo abs($customer_percentage); ?>%
-                                        </span>
-                                        <span class="text-muted small">since last month</span>
+                                        <span class="text-muted small">Registered users</span>
                                     </div>
                                 </div>
                             </div>
@@ -510,10 +300,7 @@ $total_customers = $row_customers['total_customers'];
                                     <div class="ms-3">
                                         <h6 class="text-muted mb-0">Products</h6>
                                         <h2 class="fw-bold my-1"><?php echo $total_products; ?></h2>
-                                        <span class="badge <?php echo $product_percentage >= 0 ? 'bg-success' : 'bg-danger'; ?>">
-                                            <i class="fas fa-arrow-<?php echo $product_percentage >= 0 ? 'up' : 'down'; ?> me-1"></i><?php echo abs($product_percentage); ?>%
-                                        </span>
-                                        <span class="text-muted small">since last month</span>
+                                        <span class="text-muted small"><?php echo $total_categories; ?> categories, <?php echo $total_brands; ?> brands</span>
                                     </div>
                                 </div>
                             </div>
@@ -521,7 +308,7 @@ $total_customers = $row_customers['total_customers'];
                     </div>
                 </div>
                 
-                <!-- Recent Orders Section - Replace with real data -->
+                <!-- Recent Orders & Activities -->
                 <div class="row mb-4">
                     <div class="col-lg-8 mb-4 mb-lg-0">
                         <div class="card">
@@ -544,62 +331,32 @@ $total_customers = $row_customers['total_customers'];
                                         </thead>
                                         <tbody>
                                             <?php
-                                            // Fetch recent orders (limit to 5)
-                                            $get_recent_orders = "SELECT o.*, u.username, p.amount 
+                                            // Fetch recent orders with real data
+                                            $get_recent_orders = "SELECT o.*, u.username 
                                                                 FROM user_orders o
                                                                 LEFT JOIN user_table u ON o.user_id = u.user_id
-                                                                LEFT JOIN user_payments p ON o.order_id = p.order_id
                                                                 ORDER BY o.order_date DESC LIMIT 5";
                                             $result_recent_orders = mysqli_query($con, $get_recent_orders);
-                                            if (!$result_recent_orders || mysqli_num_rows($result_recent_orders) == 0) {
-                                                // Display mock orders data
-                                                $mock_orders = array(
-                                                    array('id' => '0123', 'customer' => 'Rajesh Thapa', 'date' => '12 Jun 2023', 'amount' => '3,250', 'status' => 'Complete', 'status_class' => 'bg-success'),
-                                                    array('id' => '0122', 'customer' => 'Priya Sharma', 'date' => '11 Jun 2023', 'amount' => '1,840', 'status' => 'Processing', 'status_class' => 'bg-info'),
-                                                    array('id' => '0121', 'customer' => 'Anita Gurung', 'date' => '10 Jun 2023', 'amount' => '2,150', 'status' => 'Shipped', 'status_class' => 'bg-info'),
-                                                    array('id' => '0120', 'customer' => 'Santosh KC', 'date' => '9 Jun 2023', 'amount' => '5,640', 'status' => 'Complete', 'status_class' => 'bg-success'),
-                                                    array('id' => '0119', 'customer' => 'Maya Tamang', 'date' => '8 Jun 2023', 'amount' => '980', 'status' => 'Pending', 'status_class' => 'bg-warning')
-                                                );
-                                                
-                                                foreach ($mock_orders as $order) {
-                                            ?>
-                                            <tr>
-                                                <td>#ORD-<?php echo $order['id']; ?></td>
-                                                <td><?php echo $order['customer']; ?></td>
-                                                <td><?php echo $order['date']; ?></td>
-                                                <td>₹<?php echo $order['amount']; ?></td>
-                                                <td><span class="badge <?php echo $order['status_class']; ?>"><?php echo $order['status']; ?></span></td>
-                                                <td>
-                                                    <a href="index.php?view_order=<?php echo $order['id']; ?>" class="btn btn-sm btn-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                            <?php
-                                                }
-                                            } else {
+                                            
+                                            if ($result_recent_orders && mysqli_num_rows($result_recent_orders) > 0) {
                                                 while($row_order = mysqli_fetch_assoc($result_recent_orders)) {
                                                     $order_id = $row_order['order_id'];
-                                                    $user_name = $row_order['username'];
+                                                    $user_name = $row_order['username'] ? $row_order['username'] : 'Unknown';
                                                     $order_date = date('d M Y', strtotime($row_order['order_date']));
-                                                    $amount = $row_order['amount'] ? $row_order['amount'] : 0;
+                                                    $amount = $row_order['amount_due'];
                                                     $order_status = $row_order['order_status'];
                                                     
-                                                    // Define status badge color
+                                                    // Status badge color
                                                     $status_class = 'bg-secondary';
-                                                    if($order_status == 'Complete') {
-                                                        $status_class = 'bg-success';
-                                                    } elseif($order_status == 'Pending') {
-                                                        $status_class = 'bg-warning';
-                                                    } elseif($order_status == 'Processing') {
-                                                        $status_class = 'bg-info';
-                                                    }
+                                                    if($order_status == 'Complete') $status_class = 'bg-success';
+                                                    elseif($order_status == 'pending') $status_class = 'bg-warning';
+                                                    elseif($order_status == 'Processing') $status_class = 'bg-info';
                                             ?>
                                             <tr>
                                                 <td>#ORD-<?php echo str_pad($order_id, 4, '0', STR_PAD_LEFT); ?></td>
                                                 <td><?php echo $user_name; ?></td>
                                                 <td><?php echo $order_date; ?></td>
-                                                <td>₹<?php echo number_format($amount, 0); ?></td>
+                                                <td>Rs. <?php echo number_format($amount, 0); ?></td>
                                                 <td><span class="badge <?php echo $status_class; ?>"><?php echo $order_status; ?></span></td>
                                                 <td>
                                                     <a href="index.php?view_order=<?php echo $order_id; ?>" class="btn btn-sm btn-primary">
@@ -609,6 +366,8 @@ $total_customers = $row_customers['total_customers'];
                                             </tr>
                                             <?php
                                                 }
+                                            } else {
+                                                echo "<tr><td colspan='6' class='text-center text-muted py-4'>No orders yet</td></tr>";
                                             }
                                             ?>
                                         </tbody>
@@ -626,157 +385,72 @@ $total_customers = $row_customers['total_customers'];
                             <div class="card-body p-0">
                                 <ul class="list-group list-group-flush">
                                     <?php
-                                    // Get most recent customer based on highest user_id
-                                    $get_recent_users = "SELECT * FROM user_table ORDER BY user_id DESC LIMIT 1";
-                                    $result_recent_users = mysqli_query($con, $get_recent_users);
-                                    if (!$result_recent_users || mysqli_num_rows($result_recent_users) == 0) {
-                                        // Display mock data
-                                        $hours_ago = 2;
+                                    // Recent customer
+                                    $result_recent_user = mysqli_query($con, "SELECT * FROM user_table ORDER BY user_id DESC LIMIT 1");
+                                    if ($result_recent_user && mysqli_num_rows($result_recent_user) > 0) {
+                                        $row_user = mysqli_fetch_assoc($result_recent_user);
                                     ?>
                                     <li class="list-group-item d-flex align-items-center py-3">
                                         <div class="activity-icon bg-primary text-white rounded-circle p-3 me-3">
                                             <i class="fas fa-user"></i>
                                         </div>
                                         <div>
-                                            <p class="mb-0">New customer registered</p>
-                                            <small class="text-muted"><?php echo $hours_ago; ?> hours ago</small>
-                                        </div>
-                                    </li>
-                                    <?php } else {
-                                        $row_user = mysqli_fetch_assoc($result_recent_users);
-                                        $username = $row_user['username'];
-                                        $hours_ago = rand(1, 12); // Since we don't have timestamp, use random recent time
-                                    ?>
-                                    <li class="list-group-item d-flex align-items-center py-3">
-                                        <div class="activity-icon bg-primary text-white rounded-circle p-3 me-3">
-                                            <i class="fas fa-user"></i>
-                                        </div>
-                                        <div>
-                                            <p class="mb-0">New customer registered: <?php echo $username; ?></p>
-                                            <small class="text-muted">~<?php echo $hours_ago; ?> hours ago</small>
+                                            <p class="mb-0">New customer registered: <?php echo $row_user['username']; ?></p>
+                                            <small class="text-muted">Latest registered user</small>
                                         </div>
                                     </li>
                                     <?php } ?>
                                     
                                     <?php
-                                    // Get latest payment based on recent order
-                                    $get_recent_payment = "SELECT p.*, o.order_id FROM user_payments p 
-                                                       LEFT JOIN user_orders o ON p.order_id = o.order_id 
-                                                       ORDER BY p.payment_id DESC LIMIT 1";
-                                    $result_recent_payment = mysqli_query($con, $get_recent_payment);
-                                    if (!$result_recent_payment || mysqli_num_rows($result_recent_payment) == 0) {
-                                        // Use mock data
-                                        $invoice = "INV-2023042";
-                                        $hours_ago = 6;
-                                    ?>
-                                    <li class="list-group-item d-flex align-items-center py-3">
-                                        <div class="activity-icon bg-warning text-white rounded-circle p-3 me-3">
-                                            <i class="fas fa-money-bill"></i>
-                                        </div>
-                                        <div>
-                                            <p class="mb-0">Payment received for <?php echo $invoice; ?></p>
-                                            <small class="text-muted"><?php echo $hours_ago; ?> hours ago</small>
-                                        </div>
-                                    </li>
-                                    <?php } else {
+                                    // Recent payment
+                                    $result_recent_payment = mysqli_query($con, "SELECT * FROM user_payments ORDER BY payment_id DESC LIMIT 1");
+                                    if ($result_recent_payment && mysqli_num_rows($result_recent_payment) > 0) {
                                         $row_payment = mysqli_fetch_assoc($result_recent_payment);
-                                        $payment_id = $row_payment['payment_id'];
-                                        $amount = $row_payment['amount'];
-                                        $order_id = $row_payment['order_id'];
-                                        $invoice = "INV-" . str_pad($payment_id, 6, '0', STR_PAD_LEFT);
-                                        $hours_ago = rand(2, 24); // Since we don't have timestamp, use random recent time
                                     ?>
                                     <li class="list-group-item d-flex align-items-center py-3">
-                                        <div class="activity-icon bg-warning text-white rounded-circle p-3 me-3">
+                                        <div class="activity-icon bg-success text-white rounded-circle p-3 me-3">
                                             <i class="fas fa-money-bill"></i>
                                         </div>
                                         <div>
-                                            <p class="mb-0">Payment of ₹<?php echo number_format($amount, 0); ?> received for <?php echo $invoice; ?></p>
-                                            <small class="text-muted">~<?php echo $hours_ago; ?> hours ago</small>
+                                            <p class="mb-0">Payment of Rs. <?php echo number_format($row_payment['amount'], 0); ?> received</p>
+                                            <small class="text-muted">Via <?php echo $row_payment['payment_mode']; ?> • <?php echo date('d M Y', strtotime($row_payment['date'])); ?></small>
                                         </div>
                                     </li>
                                     <?php } ?>
                                     
                                     <?php
-                                    // Recent order using real data
-                                    $get_recent_order = "SELECT o.*, u.username FROM user_orders o 
-                                                      LEFT JOIN user_table u ON o.user_id = u.user_id 
-                                                      ORDER BY o.order_id DESC LIMIT 1";
-                                    $result_recent_order = mysqli_query($con, $get_recent_order);
-                                    if (!$result_recent_order || mysqli_num_rows($result_recent_order) == 0) {
-                                        // Display mock data
-                                        $order_id = 123;
-                                        $hours_ago = 4;
-                                    ?>
-                                    <li class="list-group-item d-flex align-items-center py-3">
-                                        <div class="activity-icon bg-success text-white rounded-circle p-3 me-3">
-                                            <i class="fas fa-shopping-cart"></i>
-                                        </div>
-                                        <div>
-                                            <p class="mb-0">New order placed #ORD-<?php echo str_pad($order_id, 4, '0', STR_PAD_LEFT); ?></p>
-                                            <small class="text-muted"><?php echo $hours_ago; ?> hours ago</small>
-                                        </div>
-                                    </li>
-                                    <?php } else {
+                                    // Recent order
+                                    $result_recent_order = mysqli_query($con, "SELECT o.*, u.username FROM user_orders o LEFT JOIN user_table u ON o.user_id = u.user_id ORDER BY o.order_id DESC LIMIT 1");
+                                    if ($result_recent_order && mysqli_num_rows($result_recent_order) > 0) {
                                         $row_order = mysqli_fetch_assoc($result_recent_order);
-                                        $order_id = $row_order['order_id'];
-                                        $username = $row_order['username'] ? $row_order['username'] : 'Customer';
-                                        $hours_ago = rand(1, 8); // Since we might not have accurate timestamps
                                     ?>
-                                    <li class="list-group-item d-flex align-items-center py-3">
-                                        <div class="activity-icon bg-success text-white rounded-circle p-3 me-3">
-                                            <i class="fas fa-shopping-cart"></i>
-                                        </div>
-                                        <div>
-                                            <p class="mb-0">New order #ORD-<?php echo str_pad($order_id, 4, '0', STR_PAD_LEFT); ?> by <?php echo $username; ?></p>
-                                            <small class="text-muted">~<?php echo $hours_ago; ?> hours ago</small>
-                                        </div>
-                                    </li>
-                                    <?php } ?>
-                                    
-                                    <?php
-                                    // Recent product added
-                                    $get_recent_product = "SELECT * FROM products ORDER BY product_id DESC LIMIT 1";
-                                    $result_recent_product = mysqli_query($con, $get_recent_product);
-                                    if (!$result_recent_product || mysqli_num_rows($result_recent_product) == 0) {
-                                        // Display mock data
-                                        $product_title = "Smart Watch Pro 2023";
-                                        $hours_ago = 8;
-                                    ?>
-                                    <li class="list-group-item d-flex align-items-center py-3">
-                                        <div class="activity-icon bg-info text-white rounded-circle p-3 me-3">
-                                            <i class="fas fa-box"></i>
-                                        </div>
-                                        <div>
-                                            <p class="mb-0">New product added: <?php echo substr($product_title, 0, 30); ?></p>
-                                            <small class="text-muted"><?php echo $hours_ago; ?> hours ago</small>
-                                        </div>
-                                    </li>
-                                    <?php } else {
-                                        $row_product = mysqli_fetch_assoc($result_recent_product);
-                                        $product_title = $row_product['product_title'];
-                                        $hours_ago = rand(5, 18); // Random time since we don't have timestamp
-                                    ?>
-                                    <li class="list-group-item d-flex align-items-center py-3">
-                                        <div class="activity-icon bg-info text-white rounded-circle p-3 me-3">
-                                            <i class="fas fa-box"></i>
-                                        </div>
-                                        <div>
-                                            <p class="mb-0">New product added: <?php echo substr($product_title, 0, 30); ?></p>
-                                            <small class="text-muted">~<?php echo $hours_ago; ?> hours ago</small>
-                                        </div>
-                                    </li>
-                                    <?php } ?>
-                                    
                                     <li class="list-group-item d-flex align-items-center py-3">
                                         <div class="activity-icon bg-warning text-white rounded-circle p-3 me-3">
-                                            <i class="fas fa-user"></i>
+                                            <i class="fas fa-shopping-cart"></i>
                                         </div>
                                         <div>
-                                            <p class="mb-0">New visitor registered from <?php echo rand(0, 1) ? 'mobile device' : 'desktop'; ?></p>
-                                            <small class="text-muted"><?php echo rand(10, 59); ?> minutes ago</small>
+                                            <p class="mb-0">Order #ORD-<?php echo str_pad($row_order['order_id'], 4, '0', STR_PAD_LEFT); ?> by <?php echo $row_order['username'] ? $row_order['username'] : 'Customer'; ?></p>
+                                            <small class="text-muted">Rs. <?php echo number_format($row_order['amount_due'], 0); ?> • <?php echo date('d M Y', strtotime($row_order['order_date'])); ?></small>
                                         </div>
                                     </li>
+                                    <?php } ?>
+                                    
+                                    <?php
+                                    // Recent product
+                                    $result_recent_product = mysqli_query($con, "SELECT * FROM products ORDER BY product_id DESC LIMIT 1");
+                                    if ($result_recent_product && mysqli_num_rows($result_recent_product) > 0) {
+                                        $row_product = mysqli_fetch_assoc($result_recent_product);
+                                    ?>
+                                    <li class="list-group-item d-flex align-items-center py-3">
+                                        <div class="activity-icon bg-info text-white rounded-circle p-3 me-3">
+                                            <i class="fas fa-box"></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0">Product added: <?php echo substr($row_product['product_title'], 0, 30); ?></p>
+                                            <small class="text-muted">Rs. <?php echo number_format($row_product['product_price'], 0); ?></small>
+                                        </div>
+                                    </li>
+                                    <?php } ?>
                                     
                                 </ul>
                             </div>
@@ -848,7 +522,7 @@ $total_customers = $row_customers['total_customers'];
         
         <!-- Footer -->
         <footer class="bg-white text-center p-3 border-top">
-            <p class="mb-0">&copy; 2023 NepalBazar Admin Panel. All rights reserved.</p>
+            <p class="mb-0">&copy; 2025 NepalBazar Admin Panel. All rights reserved.</p>
         </footer>
     </div>
 

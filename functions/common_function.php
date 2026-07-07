@@ -520,8 +520,170 @@ function get_user_order_details() {
   }
 }
 
+// ============================================================
+// PRODUCT RECOMMENDATION ALGORITHM (Content-Based Filtering)
+// ============================================================
+// This algorithm recommends products similar to the one the user
+// is currently viewing. It uses a weighted scoring system:
+//
+// Scoring Criteria:
+//   +3 points — Same category (strongest signal)
+//   +2 points — Same brand  
+//   +1 point  — Each matching keyword
+//   +1 point  — Price within 20% range (similar budget)
+//
+// Algorithm Steps:
+//   1. Fetch the current product's attributes
+//   2. Fetch all other products from the database
+//   3. For each product, calculate a similarity score
+//   4. Sort products by score in descending order
+//   5. Return the top N most similar products
+// ============================================================
 
+function get_recommended_products($current_product_id, $limit = 4) {
+    global $con;
+    
+    // ── Step 1: Get current product details ──
+    $current_product_id = (int)$current_product_id; // sanitize input
+    $query = "SELECT * FROM `products` WHERE product_id = $current_product_id";
+    $result = mysqli_query($con, $query);
+    
+    if (mysqli_num_rows($result) == 0) {
+        return []; // product not found
+    }
+    
+    $current_product = mysqli_fetch_assoc($result);
+    $current_category = $current_product['category_id'];
+    $current_brand = $current_product['brand_id'];
+    $current_price = (float)$current_product['product_price'];
+    $current_keywords = strtolower($current_product['product_keywords']);
+    $current_keyword_array = array_map('trim', explode(',', $current_keywords));
+    // Remove empty keywords
+    $current_keyword_array = array_filter($current_keyword_array, function($k) {
+        return !empty($k);
+    });
+    
+    // ── Step 2: Fetch all other products ──
+    $all_query = "SELECT * FROM `products` WHERE product_id != $current_product_id";
+    $all_result = mysqli_query($con, $all_query);
+    
+    $scored_products = [];
+    
+    // ── Step 3: Calculate similarity score for each product ──
+    while ($product = mysqli_fetch_assoc($all_result)) {
+        $score = 0;
+        $match_reasons = []; // track why this product was recommended
+        
+        // Criterion 1: Same category (+3 points)
+        if ($product['category_id'] == $current_category) {
+            $score += 3;
+            $match_reasons[] = 'same-category';
+        }
+        
+        // Criterion 2: Same brand (+2 points)
+        if ($product['brand_id'] == $current_brand) {
+            $score += 2;
+            $match_reasons[] = 'same-brand';
+        }
+        
+        // Criterion 3: Keyword overlap (+1 per matching keyword)
+        $product_keywords = strtolower($product['product_keywords']);
+        $product_keyword_array = array_map('trim', explode(',', $product_keywords));
+        $product_keyword_array = array_filter($product_keyword_array, function($k) {
+            return !empty($k);
+        });
+        
+        $keyword_matches = array_intersect($current_keyword_array, $product_keyword_array);
+        $keyword_score = count($keyword_matches);
+        if ($keyword_score > 0) {
+            $score += $keyword_score;
+            $match_reasons[] = 'keyword-match(' . $keyword_score . ')';
+        }
+        
+        // Criterion 4: Price proximity — within 20% range (+1 point)
+        $product_price = (float)$product['product_price'];
+        if ($current_price > 0) {
+            $price_diff_percent = abs($product_price - $current_price) / $current_price * 100;
+            if ($price_diff_percent <= 20) {
+                $score += 1;
+                $match_reasons[] = 'similar-price';
+            }
+        }
+        
+        // Only include products with a score > 0 (at least some similarity)
+        if ($score > 0) {
+            $product['similarity_score'] = $score;
+            $product['match_reasons'] = $match_reasons;
+            $scored_products[] = $product;
+        }
+    }
+    
+    // ── Step 4: Sort by similarity score (highest first) ──
+    usort($scored_products, function($a, $b) {
+        return $b['similarity_score'] - $a['similarity_score'];
+    });
+    
+    // ── Step 5: Return top N recommendations ──
+    return array_slice($scored_products, 0, $limit);
+}
 
-
+// Display recommended products section with visual match indicators
+function display_recommendations($product_id) {
+    $recommendations = get_recommended_products($product_id, 4);
+    
+    if (empty($recommendations)) {
+        return; // no recommendations to show
+    }
+    
+    echo '<div class="recommendations-section">';
+    echo '<div class="recommendations-header">';
+    echo '<h3><i class="fas fa-magic me-2"></i>You May Also Like</h3>';
+    echo '<p class="text-muted">Products recommended</p>';
+    echo '</div>';
+    echo '<div class="row g-4">';
+    
+    foreach ($recommendations as $product) {
+        $pid = $product['product_id'];
+        $title = htmlspecialchars($product['product_title']);
+        $desc = htmlspecialchars(substr($product['product_description'], 0, 80)) . '...';
+        $image = $product['product_image1'];
+        $price = $product['product_price'];
+        $score = $product['similarity_score'];
+        $reasons = $product['match_reasons'];
+        
+        // Generate match reason badges
+        $badges = '';
+        foreach ($reasons as $reason) {
+            if ($reason == 'same-category') {
+                // $badges .= '<span class="rec-badge rec-badge-category"><i class="fas fa-layer-group me-1"></i>Same Category</span>';
+            } elseif ($reason == 'same-brand') {
+                // $badges .= '<span class="rec-badge rec-badge-brand"><i class="fas fa-tag me-1"></i>Same Brand</span>';
+            } elseif (strpos($reason, 'keyword-match') !== false) {
+                // $badges .= '<span class="rec-badge rec-badge-keyword"><i class="fas fa-key me-1"></i>Keyword Match</span>';
+            } elseif ($reason == 'similar-price') {
+                // $badges .= '<span class="rec-badge rec-badge-price"><i class="fas fa-dollar-sign me-1"></i>Similar Price</span>';
+            }
+        }
+        
+        // Calculate match percentage (max possible score ~8, normalize to 100%)
+        $match_percent = min(100, round(($score / 8) * 100));
+        
+        echo '<div class="col-md-6 col-lg-3">';
+        echo '<div class="card h-100 rec-card">';
+        // echo '<div class="rec-score-badge"><span>' . $match_percent . '% Match</span></div>';
+        echo '<img src="./admin_area/product_images/' . $image . '" class="card-img-top" alt="' . $title . '">';
+        echo '<div class="card-body d-flex flex-column">';
+        echo '<h6 class="card-title fw-bold">' . $title . '</h6>';
+        echo '<p class="card-text text-muted small flex-grow-1">' . $desc . '</p>';
+        echo '<div class="rec-badges mb-2">' . $badges . '</div>';
+        echo '<div class="d-flex justify-content-between align-items-center mt-auto">';
+        echo '<span class="fw-bold" style="color: var(--primary-color);">Rs. ' . $price . '/-</span>';
+        echo '<a href="product_details.php?product_id=' . $pid . '" class="btn btn-sm btn-outline-primary rounded-pill">';
+        echo '<i class="fas fa-eye me-1"></i>View</a>';
+        echo '</div></div></div></div>';
+    }
+    
+    echo '</div></div>';
+}
 
 ?>

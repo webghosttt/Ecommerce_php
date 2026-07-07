@@ -130,6 +130,27 @@ $_SESSION['invoice_number'] = $invoice_number;
             padding: 20px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
+        .payment-section .row {
+            margin: 0 -0.5rem;
+        }
+        .payment-section .row > [class*='col-'] {
+            padding: 0 0.5rem;
+        }
+        .payment-section .card {
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        .payment-section .card:hover {
+            border-color: #007bff;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        .payment-section .card-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 320px;
+        }
         .product-item {
             border-bottom: 1px solid #eee;
             padding: 10px 0;
@@ -195,9 +216,9 @@ $_SESSION['invoice_number'] = $invoice_number;
         </div>
         
         <div class="payment-section">
-            <h3 class="mb-4">Select Payment Method</h3>
-            <div class="row">
-                <div class="col-md-3 mb-3">
+            <h3 class="mb-4 text-center">Select Payment Method</h3>
+            <div class="row justify-content-center g-3">
+                <!-- <div class="col-md-4 col-lg-3">
                     <div class="card h-100">
                         <div class="card-body text-center">
                             <img src="../image/esewa.png" alt="eSewa" style="max-width: 120px;" class="mb-3">
@@ -216,10 +237,10 @@ $_SESSION['invoice_number'] = $invoice_number;
                             ?>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Khalti Payment Option -->
-                <div class="col-md-3 mb-3">
+                <!-- <div class="col-md-4 col-lg-3">
                     <div class="card h-100">
                         <div class="card-body text-center">
                             <div class="bg-light p-3 mb-3 d-flex align-items-center justify-content-center" style="height: 120px;">
@@ -264,9 +285,9 @@ $_SESSION['invoice_number'] = $invoice_number;
                             ?>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 col-lg-3">
                     <div class="card h-100">
                         <div class="card-body text-center">
                             <img src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg" alt="PayPal" style="max-width: 120px;" class="mb-3">
@@ -284,7 +305,7 @@ $_SESSION['invoice_number'] = $invoice_number;
                     </div>
                 </div>
 
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 col-lg-3">
                     <div class="card h-100">
                         <div class="card-body text-center">
                             <div class="bg-light p-3 mb-3 d-flex align-items-center justify-content-center" style="height: 120px;">

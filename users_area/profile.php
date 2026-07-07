@@ -6,6 +6,7 @@ session_start();
 // Redirect if not logged in
 if (!isset($_SESSION['username'])) {
     header('location:user_login.php');
+    exit();
 }
 ?>
 
@@ -489,7 +490,7 @@ if (!isset($_SESSION['username'])) {
                             </div>";
                             
                             // Total Spent Card
-                            $total_spent_query = "SELECT SUM(amount) as total FROM `user_orders` WHERE user_id=$user_id";
+                            $total_spent_query = "SELECT SUM(amount_due) as total FROM `user_orders` WHERE user_id=$user_id";
                             $total_spent_result = mysqli_query($con, $total_spent_query);
                             $total_spent = 0;
                             if($total_spent_result && mysqli_num_rows($total_spent_result) > 0) {
@@ -530,15 +531,15 @@ if (!isset($_SESSION['username'])) {
                                             </div>
                                             <div class='order-detail'>
                                                 <span class='label'>Amount:</span>
-                                                <span class='value'>Rs. ".(isset($order['amount']) && $order['amount'] > 0 ? $order['amount'] : (isset($order['total_price']) ? $order['total_price'] : (isset($order['invoice_number']) && is_numeric($order['invoice_number']) ? $order['invoice_number'] % 10000 + 1000 : '0')))."</span>
+                                                <span class='value'>Rs. ".$order['amount_due']."</span>
                                             </div>
                                             <div class='order-detail'>
                                                 <span class='label'>Invoice Number:</span>
                                                 <span class='value'>".$order['invoice_number']."</span>
                                             </div>
                                             <div class='order-detail'>
-                                                <span class='label'>Payment Method:</span>
-                                                <span class='value'>".$order['payment_mode']."</span>
+                                                <span class='label'>Total Products:</span>
+                                                <span class='value'>".$order['total_products']."</span>
                                             </div>
                                             <div class='text-end mt-3'>
                                                 <a href='#' class='btn btn-sm btn-outline-primary'>View Details</a>

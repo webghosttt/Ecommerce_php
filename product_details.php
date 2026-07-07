@@ -115,8 +115,87 @@
             transform: translateX(5px);
         }
 
-
-
+        /* Recommendation Section Styles */
+        .recommendations-section {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        .recommendations-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .recommendations-header h3 {
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+        .recommendations-header h3 i {
+            color: var(--primary-color);
+        }
+        .rec-card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .rec-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+        }
+        .rec-card .card-img-top {
+            height: 160px;
+            object-fit: contain;
+            padding: 1rem;
+            background: #f9fafb;
+        }
+        .rec-score-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 2;
+        }
+        .rec-score-badge span {
+            background: linear-gradient(135deg, #0dcaf0, #0aa2c0);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(13, 202, 240, 0.3);
+        }
+        .rec-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .rec-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 50px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+        .rec-badge-category {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .rec-badge-brand {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        .rec-badge-keyword {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .rec-badge-price {
+            background: #fce4ec;
+            color: #c62828;
+        }
     </style>
 </head>
 <body>
@@ -201,6 +280,15 @@
                     get_unique_brand();
                     ?>
                 </div>
+
+                <?php
+                // ── RECOMMENDATION ALGORITHM SECTION ──
+                // Display recommended products based on content-based filtering
+                if(isset($_GET['product_id'])) {
+                    $current_pid = (int)$_GET['product_id'];
+                    display_recommendations($current_pid);
+                }
+                ?>
             </div>
 
             <div class="col-lg-3 order-lg-1">

@@ -352,8 +352,8 @@ if (isset($_POST['confirm_payment'])) {
                 <label class="form-label">Payment Method</label>
                 <select name="payment_mode" id="payment_mode" class="form-select">
                     <option>Select Payment Mode</option>
-                    <option>Esewa</option>
-                    <option>Khalti</option>
+                    <!-- <option>Esewa</option>
+                    <option>Khalti</option> -->
                     <option>Cash on delivery</option>
                     <option>Payoffline</option>
                 </select>

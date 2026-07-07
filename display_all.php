@@ -530,7 +530,7 @@ if(isset($_GET['add_to_cart'])){
                 </div>
 
                 <!-- Price Range Filter -->
-                <div class="card filter-card">
+                <!-- <div class="card filter-card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Price Range</h5>
                         <button class="btn btn-sm text-white" type="button" data-bs-toggle="collapse" data-bs-target="#priceCollapse">
@@ -549,10 +549,10 @@ if(isset($_GET['add_to_cart'])){
                             </button>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Popular Tags -->
-                <div class="card filter-card">
+                <!-- <div class="card filter-card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="fas fa-hashtag me-2"></i>Popular Tags</h5>
                         <button class="btn btn-sm text-white" type="button" data-bs-toggle="collapse" data-bs-target="#tagsCollapse">
@@ -571,7 +571,7 @@ if(isset($_GET['add_to_cart'])){
                             <a href="#" class="category-badge text-decoration-none text-dark">Cameras</a>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
 
             <!-- Products Display -->
